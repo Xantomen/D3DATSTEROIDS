@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+ 
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+		
+		<title>D3DATSTEROIDS</title>
+	
+	<script type="text/javascript" src="d3/d3.v3.js"></script>
+	
+	<script type="text/javascript" src="js/datsteroids.js"></script>
+	
+	<link type="text/css" href="css/datsteroids.css" rel="stylesheet"/>
+	
+	</head>
+	
+	<body>
+		<div id="fps">FPS: <span>?</span></div>
+		<script type="text/javascript">
+			
+
+	//
+	//Functions//
+	//
+	//
+		
+		
+	//Generates a random array that represents the data on the Rocks
+		
+	var generateDataset = function(number,xrand,yrand)
+	{
+		var dataArray = [];
+		var dataObject = new Object();
+		
+			for(var i=0; i<number; i++)
+			{
+				dataObject = {
+					
+					x: xrand,
+					y: yrand,
+					size: Math.floor(Math.random()*50)+25,
+					xvel: Math.floor(Math.random()*10)+15,
+					yvel: Math.floor(Math.random()*10)+15,
+					zvel: Math.floor(Math.random()*5)+10,
+					name:"Unnamed"
+					
+				}
+				
+				dataArray.push(dataObject);
+			}
+		
+		return dataArray;
+	
+	}
+	
+
+////
+///
+// Starts the main program
+///
+////
+
+
+
+			
+// Set the dimensions of the canvas / graph
+
+var	margin = {top: 5, right: 10, bottom: 10, left: 5},
+	width = window.innerWidth - margin.left - margin.right,
+	height = window.innerHeight - margin.top - margin.bottom
+	numberRocks = 20,
+	xLimit = Math.floor(Math.random()*width*Math.floor(Math.random()*5)),
+	yLimit = Math.floor(Math.random()*height*Math.floor(Math.random()*5)),
+	iterationTracker = 0;
+
+
+//Set the dataset
+
+var dataset = generateDataset(10,xLimit,yLimit);
+	
+//Set the scales
+
+var xScale = d3.scale.linear();
+var yScale = d3.scale.linear();
+var rScale = d3.scale.linear();
+
+// Set the domains
+
+var xDomain = xScale.domain([0,d3.max(dataset,function(d) { return d.x; })]),
+	yDomain = yScale.domain([0,d3.max(dataset, function(d) { return d.y; })]);
+	rDomain = rScale.domain([0,100]);
+	
+// Set the ranges
+
+var	rangeX = xScale.range([0,width]),
+	rangeY = yScale.range([height,0]);
+	rangeR = rScale.range([0,50]);
+
+
+//Create variables for frame tracking
+
+var fps = d3.select("#fps span"),
+	time0 = Date.now();
+	time1 = 0;
+
+// Create svg (canvas)
+				
+
+var canvas = d3.select("body")
+			.append("svg")
+			.attr("id","game_canvas")
+			.attr("width", width)
+			.attr("height", height);
+	
+			
+				function gameLoop(){
+					
+					
+					//Select circles
+					
+				var circles = canvas.selectAll("circle")
+				   .data(dataset, function(d,i){ d.key=i; return d.key; });
+				   
+				   //Update circles
+				   
+				   circles.enter()
+				   .append("circle")
+				   .attr("cx", function(d) {
+				   		return xScale(d.x);
+				   })
+				   .attr("cy", function(d) {
+				   		return yScale(d.y);
+				   })
+				   .attr("r", function(d) {
+				   		return rScale(d.size)
+				   });
+					
+					
+					//Remove circles without value
+					
+					circles.exit().remove();
+					
+					
+					
+					//Add a circle every X seconds
+					
+					if(iterationTracker == 0 || iterationTracker%100 == 0) addRock();
+					
+					//Move all rocks
+										
+					moveRocks(circles);
+					
+					//Paint frames
+					time1 = Date.now();
+					fps.text(Math.round(1000 / (time1 - time0)));
+					time0 = time1;
+					
+					iterationTracker++;
+					console.log(iterationTracker);
+						
+				} setInterval(gameLoop,5);
+			
+				
+				function addRock()
+				{
+					
+					//Recalculate randomness
+					
+					xLimit = Math.floor(Math.random()*width*Math.floor(Math.random()*5)),
+					yLimit = Math.floor(Math.random()*height*Math.floor(Math.random()*5));
+					
+					//Add rock to dataset
+					
+					dataset = dataset.concat(generateDataset(1,xLimit,yLimit));
+					
+					//Modify the domains if there are rocks further away, to make for a zooming effect
+					
+					xDomain = xScale.domain([0,d3.max(dataset,function(d) { return d.x; })]),
+					yDomain = yScale.domain([0,d3.max(dataset, function(d) { return d.y; })]);
+					//rDomain = rScale.domain([0,100]);
+				}
+		
+				function moveRocks(rocks)
+				{
+					dataset.forEach(function(d){
+						
+						d.x += d.xvel;
+						d.y += d.yvel;
+						
+						/*if(d.x < 0 || d.x > xLimit || d.y < 0 || d.y > yLimit)
+						{
+							dataset.shift();
+						}*/
+						
+					});
+					
+					rocks
+					.attr("cx", function(d) {
+				   		return xScale(d.x);
+				   })
+				   .attr("cy", function(d) {
+				   		return yScale(d.y);
+				   })
+				   .attr("r", function(d) {
+				   		return rScale(d.size)
+				   });
+					
+					
+					
+				}
+		
+		
+	
+			
+		</script>
+		
+		
+	</body>
+
+</html>
