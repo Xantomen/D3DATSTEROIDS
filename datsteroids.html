@@ -25,10 +25,25 @@
 	//
 	//
 		
+	
+	//Gets random Int or Float in a range of values. 
+	//Zerovalue will substitute zero when it appears. This is so it doesn't mess my velocities later. Don't
+	//want static objects around.
+	
+	var getRandomNum = function(min, max, zerovalue, isInt) {
+    	var value = 0;
+    	
+    	if(isInt) value = Math.floor(Math.random() * (max - min + 1)) + min;
+    	else value = Math.random() * (max - min ) + min;
+    	
+    	if(value == 0) value = zerovalue;
+    	
+    	return value;
+	}
 		
 	//Generates a random array that represents the data on the Rocks
 		
-	var generateDataset = function(number,xrand,yrand)
+	var generateDataset = function(number)
 	{
 		var dataArray = [];
 		var dataObject = new Object();
@@ -37,16 +52,18 @@
 			{
 				dataObject = {
 					
-					x: xrand,
-					y: yrand,
-					size: Math.floor(Math.random()*50)+25,
-					xvel: Math.floor(Math.random()*10)+15,
-					yvel: Math.floor(Math.random()*10)+15,
-					zvel: Math.floor(Math.random()*5)+10,
+					key: indexRocks,
+					x: getRandomNum(0,width,0,true),
+					y: getRandomNum(0,height,0,true),
+					size: getRandomNum(30,75,0,true),
+					xvel: getRandomNum(-2,2,0.5,true),
+					yvel: getRandomNum(-2,2,0.5,true),
+					zvel: getRandomNum(-0.05,0.05,-0.01,false),
 					name:"Unnamed"
 					
 				}
 				
+				indexRocks++;
 				dataArray.push(dataObject);
 			}
 		
@@ -70,14 +87,13 @@ var	margin = {top: 5, right: 10, bottom: 10, left: 5},
 	width = window.innerWidth - margin.left - margin.right,
 	height = window.innerHeight - margin.top - margin.bottom
 	numberRocks = 20,
-	xLimit = Math.floor(Math.random()*width*Math.floor(Math.random()*5)),
-	yLimit = Math.floor(Math.random()*height*Math.floor(Math.random()*5)),
-	iterationTracker = 0;
+	iterationTracker = 0,
+	indexRocks = 0;
 
 
 //Set the dataset
 
-var dataset = generateDataset(10,xLimit,yLimit);
+var dataset = generateDataset(1);
 	
 //Set the scales
 
@@ -85,18 +101,20 @@ var xScale = d3.scale.linear();
 var yScale = d3.scale.linear();
 var rScale = d3.scale.linear();
 
+
 // Set the domains
 
-var xDomain = xScale.domain([0,d3.max(dataset,function(d) { return d.x; })]),
-	yDomain = yScale.domain([0,d3.max(dataset, function(d) { return d.y; })]);
+var xDomain = xScale.domain([0,width]),
+	yDomain = yScale.domain([0,height]);
 	rDomain = rScale.domain([0,100]);
+	
 	
 // Set the ranges
 
 var	rangeX = xScale.range([0,width]),
 	rangeY = yScale.range([height,0]);
 	rangeR = rScale.range([0,50]);
-
+	
 
 //Create variables for frame tracking
 
@@ -120,7 +138,7 @@ var canvas = d3.select("body")
 					//Select circles
 					
 				var circles = canvas.selectAll("circle")
-				   .data(dataset, function(d,i){ d.key=i; return d.key; });
+				   .data(dataset, function(d){ return d.key; });
 				   
 				   //Update circles
 				   
@@ -134,7 +152,32 @@ var canvas = d3.select("body")
 				   })
 				   .attr("r", function(d) {
 				   		return rScale(d.size)
+				   })
+				   .attr("fill", function(d) {
+				   	
+				   		var radius = rScale(d.size);
+				   		
+				   		if(d.zvel > 0) return "black";
+				   		else return "steelblue";
+				   		
+				   		//(130,188,255) Light blue
+				   		//(117,0,0) Dark red
+				   })
+				   .transition()
+				   .duration(function(d){
+				   		return Math.abs(d.zvel)*100000;
+				   })
+				   .attr("fill", function(d) {
+				   	
+				   		var radius = rScale(d.size);
+				   		
+				   		if(d.zvel > 0) return "steelblue";
+				   		else return "black";
+				   		
+				   		//(130,188,255) Light blue
+				   		//(117,0,0) Dark red
 				   });
+				   
 					
 					
 					//Remove circles without value
@@ -157,28 +200,20 @@ var canvas = d3.select("body")
 					time0 = time1;
 					
 					iterationTracker++;
-					console.log(iterationTracker);
+					
 						
-				} setInterval(gameLoop,5);
+				} setInterval(gameLoop,20);
 			
 				
 				function addRock()
 				{
-					
-					//Recalculate randomness
-					
-					xLimit = Math.floor(Math.random()*width*Math.floor(Math.random()*5)),
-					yLimit = Math.floor(Math.random()*height*Math.floor(Math.random()*5));
-					
+										
+										
 					//Add rock to dataset
 					
-					dataset = dataset.concat(generateDataset(1,xLimit,yLimit));
+					dataset = dataset.concat(generateDataset(1));
 					
-					//Modify the domains if there are rocks further away, to make for a zooming effect
 					
-					xDomain = xScale.domain([0,d3.max(dataset,function(d) { return d.x; })]),
-					yDomain = yScale.domain([0,d3.max(dataset, function(d) { return d.y; })]);
-					//rDomain = rScale.domain([0,100]);
 				}
 		
 				function moveRocks(rocks)
@@ -187,11 +222,17 @@ var canvas = d3.select("body")
 						
 						d.x += d.xvel;
 						d.y += d.yvel;
+						d.size += d.zvel;
 						
-						/*if(d.x < 0 || d.x > xLimit || d.y < 0 || d.y > yLimit)
+						if(d.size < 0) d.size = 0;
+						
+						//If rock is outside of the canvas we delete it from dataset
+						
+						if(d.x < 0-300 || d.x > width+300 || d.y < 0-300 || d.y > height+300)
 						{
-							dataset.shift();
-						}*/
+							dataset.splice(dataset.indexOf(d),1);
+							
+						}
 						
 					});
 					
@@ -204,8 +245,7 @@ var canvas = d3.select("body")
 				   })
 				   .attr("r", function(d) {
 				   		return rScale(d.size)
-				   });
-					
+				   });					
 					
 					
 				}
