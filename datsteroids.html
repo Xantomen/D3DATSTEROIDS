@@ -55,10 +55,10 @@
 					key: indexRocks,
 					x: getRandomNum(0,width,0,true),
 					y: getRandomNum(0,height,0,true),
-					size: getRandomNum(30,75,0,true),
+					size: getRandomNum(0,1,0,true),
 					xvel: getRandomNum(-2,2,0.5,true),
 					yvel: getRandomNum(-2,2,0.5,true),
-					zvel: getRandomNum(-0.05,0.05,-0.01,false),
+					zvel: getRandomNum(0.008,0.01,0,true),
 					name:"Unnamed"
 					
 				}
@@ -106,14 +106,14 @@ var rScale = d3.scale.linear();
 
 var xDomain = xScale.domain([0,width]),
 	yDomain = yScale.domain([0,height]);
-	rDomain = rScale.domain([0,100]);
+	rDomain = rScale.domain([0,1]);
 	
 	
 // Set the ranges
 
 var	rangeX = xScale.range([0,width]),
 	rangeY = yScale.range([height,0]);
-	rangeR = rScale.range([0,50]);
+	rangeR = rScale.range([0,200]);
 	
 
 //Create variables for frame tracking
@@ -151,6 +151,11 @@ var canvas = d3.select("body")
 				   		return yScale(d.y);
 				   })
 				   .attr("r", function(d) {
+				   	
+				   	console.log(d.size);
+				   		if(d.size >= 1) d.zvel = -(Math.abs(d.zvel));
+				   		else d.zvel = Math.abs(d.zvel);
+				   	
 				   		return rScale(d.size)
 				   })
 				   .attr("fill", function(d) {
@@ -165,7 +170,10 @@ var canvas = d3.select("body")
 				   })
 				   .transition()
 				   .duration(function(d){
-				   		return Math.abs(d.zvel)*100000;
+				   		
+				   		if(d.zvel > 0) return d.zvel*100000;
+				   		else return Math.abs(d.zvel)*750000;
+				   		
 				   })
 				   .attr("fill", function(d) {
 				   	
@@ -226,9 +234,10 @@ var canvas = d3.select("body")
 						
 						if(d.size < 0) d.size = 0;
 						
+						
 						//If rock is outside of the canvas we delete it from dataset
 						
-						if(d.x < 0-300 || d.x > width+300 || d.y < 0-300 || d.y > height+300)
+						if(d.x < 0-300 || d.x > width+300 || d.y < 0-300 || d.y > height+300 || d.size > 1.5)
 						{
 							dataset.splice(dataset.indexOf(d),1);
 							
