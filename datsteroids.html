@@ -55,7 +55,7 @@
 					key: indexRocks,
 					x: getRandomNum(0,width,0,true),
 					y: getRandomNum(0,height,0,true),
-					size: getRandomNum(0,1,0,true),
+					size: getRandomNum(0,0,0,true),
 					xvel: getRandomNum(-2,2,0.5,true),
 					yvel: getRandomNum(-2,2,0.5,true),
 					zvel: getRandomNum(0.008,0.01,0,true),
@@ -152,38 +152,25 @@ var canvas = d3.select("body")
 				   })
 				   .attr("r", function(d) {
 				   	
-				   	console.log(d.size);
-				   		if(d.size >= 1) d.zvel = -(Math.abs(d.zvel));
-				   		else d.zvel = Math.abs(d.zvel);
-				   	
-				   		return rScale(d.size)
+				   		return rScale(d.size);
 				   })
 				   .attr("fill", function(d) {
 				   	
 				   		var radius = rScale(d.size);
 				   		
-				   		if(d.zvel > 0) return "black";
-				   		else return "steelblue";
-				   		
-				   		//(130,188,255) Light blue
-				   		//(117,0,0) Dark red
+				   		return "black";
+	
 				   })
 				   .transition()
 				   .duration(function(d){
 				   		
-				   		if(d.zvel > 0) return d.zvel*100000;
-				   		else return Math.abs(d.zvel)*750000;
+				   		return d.zvel*100000;
 				   		
 				   })
 				   .attr("fill", function(d) {
 				   	
-				   		var radius = rScale(d.size);
-				   		
-				   		if(d.zvel > 0) return "steelblue";
-				   		else return "black";
-				   		
-				   		//(130,188,255) Light blue
-				   		//(117,0,0) Dark red
+				   		return "steelblue";
+		
 				   });
 				   
 					
@@ -237,7 +224,7 @@ var canvas = d3.select("body")
 						
 						//If rock is outside of the canvas we delete it from dataset
 						
-						if(d.x < 0-300 || d.x > width+300 || d.y < 0-300 || d.y > height+300 || d.size > 1.5)
+						if(d.x < 0-300 || d.x > width+300 || d.y < 0-300 || d.y > height+300 /*|| d.size > 1.5*/)
 						{
 							dataset.splice(dataset.indexOf(d),1);
 							
