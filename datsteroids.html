@@ -122,22 +122,100 @@ var fps = d3.select("#fps span"),
 	time0 = Date.now();
 	time1 = 0;
 
-// Create svg (canvas)
-				
 
-var canvas = d3.select("body")
-			.append("svg")
-			.attr("id","game_canvas")
-			.attr("width", width)
-			.attr("height", height);
+
+// Create container for canvas
+				
+var game_container = d3.select("body")
+			.append("div")
+			.attr("id","game_container")
+			.style("width", width+"px")
+			.style("height", height+"px");
+			
+	// Create cockpit
 	
+	var cockpit = d3.select("#game_container")
+				.append("div")
+				.attr("id","cockpit")
+				.style("width", width+"px")
+				.style("height", height+"px");
+	
+	
+		// Create cockpit window (For details, etc).
+		
+		var cockpitwindow = d3.select("#cockpit")
+							 .append("div")
+							 .attr("id","cockpit_window")
+							 .style("width", width+"px")
+							 .style("height", height+"px");
+	
+	
+			// Create svg (game_canvas)
+							
+			var game_canvas = d3.select("#cockpit_window")
+						.append("svg")
+						.attr("id","game_canvas")
+						.attr("width", width)
+						.attr("height", height);
+	
+			// Create cockpit window details
+		
+			var cockpitwindow_details = d3.select("#cockpit_window")
+						.append("svg")
+						.attr("id","cockpit_window_details")
+						.attr("width", width)
+						.attr("height", height);
+
+				var ellipses = cockpitwindow_details.selectAll("ellipse")
+						.data([[(width*0.5),(height*0.5),(width*0.5),(height*0.5)],
+						[(width*0.5),(height*0.5),(width*0.5),(height*0.5)],
+						[(width*0.5),(height*0.5),(width*0.5),(height*0.5)],
+						[(width*0.5),(height*0.5),(width*0.5),(height*0.5)],
+						[(width*0.5),(height*0.5),(width*0.5),(height*0.5)]]);
+					
+					
+					var horiz_division_pixels = width*0.5 / ellipses[0].length;
+					var vert_division_pixels = height*0.5 / ellipses[0].length;
+					
+						
+					ellipses.enter()	
+						.append("ellipse")
+						.attr("cx",function(d) { return d[0]; })
+						.attr("cy",function(d) { return d[1]; })
+						.attr("rx",function(d,i) { return (i+1)*horiz_division_pixels;  })
+						.attr("ry",function(d,i) { return (i+1)*vert_division_pixels;  })
+						.attr("fill",function(d) { return "none";  })
+						.attr("stroke",function(d) { return "black";  })
+						.attr("stroke-width",function(d,i) { if(i == ellipses[0].length - 1) return 5; else return 1;  });
+
+				
+				var lines = cockpitwindow_details.selectAll("line")
+							.data([[0,height*0.5,width*0.5-horiz_division_pixels,height*0.5],
+								[width*0.5+horiz_division_pixels,height*0.5,width,height*0.5],
+								[width*0.5,0,width*0.5,height*0.5-vert_division_pixels],
+								[width*0.5,height*0.5+vert_division_pixels,width*0.5,height]
+								/*[0,0,width,height],
+								[0,height,width,0]*/]);
+							
+						
+						lines.enter()
+							.append("line")
+							.attr("x1", function(d) { return d[0]  })
+							.attr("y1", function(d) { return d[1]  })
+							.attr("x2", function(d) { return d[2]  })
+							.attr("y2", function(d) { return d[3]  })
+							.attr("stroke","black")
+							.attr("stroke-width",1);
+
+				
+				
 			
 				function gameLoop(){
 					
 					
 					//Select circles
 					
-				var circles = canvas.selectAll("circle")
+				var circles = game_canvas.selectAll("circle")
 				   .data(dataset, function(d){ return d.key; });
 				   
 				   //Update circles
@@ -224,7 +302,7 @@ var canvas = d3.select("body")
 						
 						//If rock is outside of the canvas we delete it from dataset
 						
-						if(d.x < 0-300 || d.x > width+300 || d.y < 0-300 || d.y > height+300 /*|| d.size > 1.5*/)
+						if(d.x < 0-300 || d.x > width+300 || d.y < 0-300 || d.y > height+300 || d.size > 1.5)
 						{
 							dataset.splice(dataset.indexOf(d),1);
 							

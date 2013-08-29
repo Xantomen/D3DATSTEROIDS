@@ -3,13 +3,6 @@ html
 	overflow:hidden;
 }
 
-#game_canvas
-{
-	position:absolute;
-		
-	background: rgba(0,0,255,0.1);
-}
-
 
 circle {
   /*fill: steelblue;*/
@@ -22,3 +15,47 @@ circle {
 	position:absolute;
 	
 }
+
+#game_container {
+	
+	position:absolute;
+
+	background-color:darkgrey;
+	
+	pointer-events:none;
+	
+}
+
+	#cockpit {
+		
+		position:absolute;
+		
+		
+		
+	}
+
+		#cockpit_window {
+			
+			position:absolute;
+			
+			overflow:hidden;
+			
+			border-radius:90%;
+			
+			background:blue;
+		}
+		
+			#game_canvas
+			{
+				position:absolute;
+					
+				
+			}
+
+		#cockpit_window_details {
+			
+			position:absolute;
+			
+			
+		}
+
