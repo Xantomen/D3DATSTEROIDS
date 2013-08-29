@@ -61,4 +61,10 @@ circle {
 			
 			pointer-events: none;
 		}
+		
+		.explosion {
+			
+			
+			stroke-width:2;
+		}
 
