@@ -59,6 +59,7 @@
 					xvel: getRandomNum(-2,2,0.5,true),
 					yvel: getRandomNum(-2,2,0.5,true),
 					zvel: getRandomNum(0.008,0.01,0,true),
+					hitCount: 0,
 					name:"Unnamed"
 					
 				}
@@ -88,7 +89,8 @@ var	margin = {top: 5, right: 10, bottom: 10, left: 5},
 	height = window.innerHeight - margin.top - margin.bottom
 	numberRocks = 20,
 	iterationTracker = 0,
-	indexRocks = 0;
+	indexRocks = 0,
+	laserSide = 1;
 
 
 //Set the dataset
@@ -156,7 +158,110 @@ var game_container = d3.select("body")
 						.append("svg")
 						.attr("id","game_canvas")
 						.attr("width", width)
-						.attr("height", height);
+						.attr("height", height).on("click",function(d) {
+				   	
+				   			var coordinates = [0,0];
+				   			
+				   			coordinates = d3.mouse(this);
+				   			
+				   			var clickX = coordinates[0];
+				   			var clickY = coordinates[1];
+				   	
+				   			
+				   			var originWidth = 0;
+				   			var originHeight = 0;
+				   			
+				   			// Laserside 1 is left. Laserside 2 is right.
+				   			
+				   			if(laserSide == 1) 
+				   			{ 
+				   				originWidth = width*0.25 + getRandomNum(-10,+10,0,true);
+				   				originHeight = height + getRandomNum(-10,+10,0,true);
+				   				
+				   				//Adding laser rays with animations, to destroy the rocks
+				   	
+					   	 		var ray1 = game_canvas.selectAll(".ray1")
+					   	 				.data([[originWidth,originHeight,clickX,clickY]]);
+					   	 					
+					   	 			ray1.enter()
+					   	 				.append("line")
+					   	 				.attr("class","ray1")
+					   	 				.attr("x1", function(d) { return d[0]  })
+										.attr("y1", function(d) { return d[1]  })
+										.attr("x2", function(d) { return d[0]  })
+										.attr("y2", function(d) { return d[1]  })
+										.attr("stroke","yellow")
+										.attr("stroke-width",1);
+										
+									ray1
+										
+										.transition()
+										.duration(100)
+										//.delay(function(d,i) { return i*1000;  })
+										.attr("x2", function(d) { return d[2]  })
+										.attr("y2", function(d) { return d[3]  })
+										.attr("stroke","white")
+										.attr("stroke-width",5)
+										.transition()
+										.duration(100)
+										.attr("x1", function(d) { return d[2]  })
+										.attr("y1", function(d) { return d[3]  })
+										.attr("stroke","red")
+										.attr("stroke-width",1)
+										.transition()
+										.attr("x1", function(d) { return d[0]  })
+										.attr("y1", function(d) { return d[1]  })
+										.attr("x2", function(d) { return d[0]  })
+										.attr("y2", function(d) { return d[1]  });	
+				   				
+				   				laserSide++; 
+				   			}
+				   			else
+				   			{ 
+				   				originWidth = width*0.75 + getRandomNum(-10,+10,0,true);
+				   				originHeight = height + getRandomNum(-10,+10,0,true);
+				   				
+				   				
+				   				var ray2 = game_canvas.selectAll(".ray2")
+				   	 				.data([[originWidth,originHeight,clickX,clickY]]);
+				   	 					
+				   	 			ray2.enter()
+				   	 				.append("line")
+				   	 				.attr("class","ray2")
+				   	 				.attr("x1", function(d) { return d[0]  })
+									.attr("y1", function(d) { return d[1]  })
+									.attr("x2", function(d) { return d[0]  })
+									.attr("y2", function(d) { return d[1]  })
+									.attr("stroke","yellow")
+									.attr("stroke-width",1);
+									
+								ray2
+									.transition()
+									.duration(100)
+									//.delay(function(d,i) { return i*1000;  })
+									.attr("x2", function(d) { return d[2]  })
+									.attr("y2", function(d) { return d[3]  })
+									.attr("stroke","white")
+									.attr("stroke-width",5)
+									.transition()
+									.duration(100)
+									.attr("x1", function(d) { return d[2]  })
+									.attr("y1", function(d) { return d[3]  })
+									.attr("stroke","red")
+									.attr("stroke-width",1)
+									.transition()
+									.attr("x1", function(d) { return d[0]  })
+									.attr("y1", function(d) { return d[1]  })
+									.attr("x2", function(d) { return d[0]  })
+									.attr("y2", function(d) { return d[1]  });		
+				   				
+				   				
+				   				laserSide--; 
+				   			}
+				   	
+				   			
+				   					
+				   		});
 	
 			// Create cockpit window details
 		
@@ -247,7 +352,8 @@ var game_container = d3.select("body")
 				   
 				   .on("click",function(d) {
 				   	
-				   	 console.log(d);
+				   	 divideRocks(d);
+			
 				   	
 				   })
 				   .transition()
@@ -272,7 +378,7 @@ var game_container = d3.select("body")
 					
 					//Add a circle every X seconds
 					
-					if(iterationTracker == 0 || iterationTracker%100 == 0) addRock();
+					if(iterationTracker == 0 || iterationTracker%100 == 0) addRocks(1);
 					
 					//Move all rocks
 										
@@ -289,13 +395,16 @@ var game_container = d3.select("body")
 				} setInterval(gameLoop,20);
 			
 				
-				function addRock()
+				function addRocks(number)
 				{
-										
+					
+					var rock = 	generateDataset(number);				
 										
 					//Add rock to dataset
 					
-					dataset = dataset.concat(generateDataset(1));
+					dataset = dataset.concat(rock);
+					
+					return rock;
 					
 					
 				}
@@ -315,7 +424,7 @@ var game_container = d3.select("body")
 						
 						if(d.x < 0-300 || d.x > width+300 || d.y < 0-300 || d.y > height+300 || d.size > 1.5)
 						{
-							dataset.splice(dataset.indexOf(d),1);
+							deleteRock(d);
 							
 						}
 						
@@ -335,8 +444,34 @@ var game_container = d3.select("body")
 					
 				}
 		
+				function divideRocks(rock) {
+					
+					var rockset = addRocks(2);
+					
+					rockset.forEach(function(d){
+						
+						d.x = rock.x + getRandomNum(-50,50,10,true);
+						d.y = rock.y + getRandomNum(-50,50,-10,true);
+						d.size = rock.size-rock.size*0.5;
+						d.xvel = rock.xvel;
+						d.yvel = rock.yvel;
+						d.zvel = rock.zvel-rock.zvel*0.5;
+						d.hitCount = rock.hitCount+1;
+						
+						if(d.hitCount > 2 && d.size < 0.1) {console.log(d.size);deleteRock(d)};	
+					});
+					
+					deleteRock(rock);
+					
+					
+				}
 		
-	
+				function deleteRock(rock) 
+				{
+					
+					dataset.splice(dataset.indexOf(rock),1);
+					
+				}
 			
 		</script>
 		
