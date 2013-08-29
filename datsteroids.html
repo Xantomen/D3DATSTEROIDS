@@ -166,6 +166,8 @@ var game_container = d3.select("body")
 						.attr("width", width)
 						.attr("height", height);
 
+				//Ellipse lines in the window
+
 				var ellipses = cockpitwindow_details.selectAll("ellipse")
 						.data([[(width*0.5),(height*0.5),(width*0.5),(height*0.5)],
 						[(width*0.5),(height*0.5),(width*0.5),(height*0.5)],
@@ -188,6 +190,7 @@ var game_container = d3.select("body")
 						.attr("stroke",function(d) { return "black";  })
 						.attr("stroke-width",function(d,i) { if(i == ellipses[0].length - 1) return 5; else return 1;  });
 
+				//Lines in the window
 				
 				var lines = cockpitwindow_details.selectAll("line")
 							.data([[0,height*0.5,width*0.5-horiz_division_pixels,height*0.5],
@@ -238,6 +241,14 @@ var game_container = d3.select("body")
 				   		
 				   		return "black";
 	
+				   })
+				   
+				   //When click on rock, calls to divide rock operation
+				   
+				   .on("click",function(d) {
+				   	
+				   	 console.log(d);
+				   	
 				   })
 				   .transition()
 				   .duration(function(d){

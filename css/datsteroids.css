@@ -22,7 +22,7 @@ circle {
 
 	background-color:darkgrey;
 	
-	pointer-events:none;
+	
 	
 }
 
@@ -43,6 +43,8 @@ circle {
 			border-radius:90%;
 			
 			background:blue;
+			
+			
 		}
 		
 			#game_canvas
@@ -56,6 +58,6 @@ circle {
 			
 			position:absolute;
 			
-			
+			pointer-events: none;
 		}
 
