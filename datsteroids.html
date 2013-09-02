@@ -310,8 +310,8 @@ var game_container = d3.select("body")
 					var title = d3.select("h1");
 					
 					queue()
-					    .defer(d3.json, "Maps.GeoInfo/world-110m.json")
-					    .defer(d3.tsv, "Maps.GeoInfo/world-country-names.tsv")
+					    .defer(d3.json, "geoinfo/world-110m.json")
+					    .defer(d3.tsv, "geoinfo/world-country-names.tsv")
 					    .await(ready); 
 					    
 					function ready(error, world, names) {
