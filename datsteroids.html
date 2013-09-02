@@ -8,6 +8,8 @@
 		<title>D3DATSTEROIDS</title>
 	
 	<script type="text/javascript" src="d3/d3.v3.js"></script>
+	<script type="text/javascript" src="topojson/topojson.js"></script>
+	<script type="text/javascript" src="queue/queue.js"></script>
 	
 	<script type="text/javascript" src="js/datsteroids.js"></script>
 	
@@ -80,17 +82,26 @@
 ////
 
 
-
 			
 // Set the dimensions of the canvas / graph
 
-var	margin = {top: 5, right: 10, bottom: 10, left: 5},
+var	margin = {top: 0, right: 0, bottom: 0, left: 0},
 	width = window.innerWidth - margin.left - margin.right,
-	height = window.innerHeight - margin.top - margin.bottom
+	height = window.innerHeight - margin.top - margin.bottom,
 	numberRocks = 20,
 	iterationTracker = 0,
 	indexRocks = 0,
 	laserSide = 1;
+
+
+/////
+////   TOPOJson Data Test
+/////
+
+
+
+    
+    
 
 
 //Set the dataset
@@ -136,7 +147,7 @@ var game_container = d3.select("body")
 			
 	// Create cockpit
 	
-	var cockpit = d3.select("#game_container")
+	/*var cockpit = d3.select("#game_container")
 				.append("div")
 				.attr("id","cockpit")
 				.style("width", width+"px")
@@ -155,7 +166,7 @@ var game_container = d3.select("body")
 			// Create svg (game_canvas)
 							
 			var game_canvas = d3.select("#cockpit_window")
-						.append("svg")
+						.append("div")
 						.attr("id","game_canvas")
 						.attr("width", width)
 						.attr("height", height).on("click",function(d) {
@@ -177,8 +188,18 @@ var game_container = d3.select("body")
 				   			{ 
 				   				originWidth = width*0.25 + getRandomNum(-10,+10,0,true);
 				   				originHeight = height + getRandomNum(-10,+10,0,true);
-				   				
-				   				//Adding laser rays with animations, to destroy the rocks
+				   				laserSide++;
+				   			}
+				   			
+				   			else
+				   			{
+				   				originWidth = width*0.75 + getRandomNum(-10,+10,0,true);
+				   				originHeight = height + getRandomNum(-10,+10,0,true);
+				   				laserSide--; 	
+				   			}	
+				   			
+				   			
+				   			//Adding laser rays with animations, to destroy the rocks
 				   	
 					   	 		var ray1 = game_canvas.selectAll(".ray1")
 					   	 				.data([[originWidth,originHeight,clickX,clickY]]);
@@ -214,54 +235,7 @@ var game_container = d3.select("body")
 										.attr("x2", function(d) { return d[0]  })
 										.attr("y2", function(d) { return d[1]  })
 										.remove();	
-				   				
-				   				laserSide++; 
-				   			}
-				   			else
-				   			{ 
-				   				originWidth = width*0.75 + getRandomNum(-10,+10,0,true);
-				   				originHeight = height + getRandomNum(-10,+10,0,true);
-				   				
-				   				
-				   				var ray2 = game_canvas.selectAll(".ray2")
-				   	 				.data([[originWidth,originHeight,clickX,clickY]]);
-				   	 					
-				   	 			ray2.enter()
-				   	 				.append("line")
-				   	 				.attr("class","ray2")
-				   	 				.attr("x1", function(d) { return d[0]  })
-									.attr("y1", function(d) { return d[1]  })
-									.attr("x2", function(d) { return d[0]  })
-									.attr("y2", function(d) { return d[1]  })
-									.attr("stroke","blue")
-									.attr("stroke-width",1)
-									
-								
-									.transition()
-									.duration(100)
-									//.delay(function(d,i) { return i*1000;  })
-									.attr("x2", function(d) { return d[2]  })
-									.attr("y2", function(d) { return d[3]  })
-									.attr("stroke","yellow")
-									.attr("stroke-width",5)
-									.transition()
-									.duration(100)
-									.attr("x1", function(d) { return d[2]  })
-									.attr("y1", function(d) { return d[3]  })
-									.attr("stroke","red")
-									.attr("stroke-width",1)
-									.transition()
-									.attr("x1", function(d) { return d[0]  })
-									.attr("y1", function(d) { return d[1]  })
-									.attr("x2", function(d) { return d[0]  })
-									.attr("y2", function(d) { return d[1]  })
-									.remove();		
-				   				
-				   				
-				   				laserSide--; 
-				   			}
-				   	
-				   			
+				   					
 				   					
 				   		});
 	
@@ -304,8 +278,7 @@ var game_container = d3.select("body")
 								[width*0.5+horiz_division_pixels,height*0.5,width,height*0.5],
 								[width*0.5,0,width*0.5,height*0.5-vert_division_pixels],
 								[width*0.5,height*0.5+vert_division_pixels,width*0.5,height]
-								/*[0,0,width,height],
-								[0,height,width,0]*/]);
+								]);
 							
 						
 						lines.enter()
@@ -315,10 +288,112 @@ var game_container = d3.select("body")
 							.attr("x2", function(d) { return d[2]  })
 							.attr("y2", function(d) { return d[3]  })
 							.attr("stroke","black")
-							.attr("stroke-width",1);
+							.attr("stroke-width",1);*/
 
 				
-				
+				function mapTest()
+				{
+					var projection = d3.geo.orthographic()
+					    //.scale(248)
+					    .scale(400)
+					    .clipAngle(90);
+					
+					/*var canvas = d3.select("#game_canvas").append("canvas")
+					    .attr("width", width)
+					    .attr("height", height);
+					    
+					var c = canvas.node().getContext("2d");*/
+					 
+					var path = d3.geo.path()
+					    .projection(projection);
+					 
+					var title = d3.select("h1");
+					
+					queue()
+					    .defer(d3.json, "Maps.GeoInfo/world-110m.json")
+					    .defer(d3.tsv, "Maps.GeoInfo/world-country-names.tsv")
+					    .await(ready); 
+					    
+					function ready(error, world, names) {
+					  var //globe = {type: "Sphere"},
+					      land = topojson.feature(world, world.objects.land);
+					      countries = topojson.feature(world, world.objects.countries).features;
+					      //var borders = topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }),
+					      i = -1,
+					      n = countries.length;
+					 
+					  countries = countries.filter(function(d) {
+					    return names.some(function(n) {
+					      if (d.id == n.id) return d.name = n.name;
+					    });
+					  });  
+					  
+					  countries = countries.filter(function(d) {
+					    
+					      return d.name == "Angola";
+					      
+					    });
+					     
+					    
+					    							
+    						/*game_container
+							  	.append("path")
+							  	.datum({ type: "FeatureCollection", features: countries })
+							  	.attr("d",path)
+							    //.attr("d", lineFunction(countries[0].geometry.coordinates[0]))
+							    .attr("stroke","red")
+							    .attr("stroke-width",10)
+							    .attr("fill","yellow")
+							    .attr("width",width)
+							    .attr("height",height);*/
+							    
+					     	
+							
+							//This is the accessor function we talked about above
+							 var lineFunction = d3.svg.line()
+							                          .x(function(d) { return d[0]; })
+							                          .y(function(d) { return d[0]; })
+							                         .interpolate("linear");
+							
+							//The SVG Container
+							var svgContainer = d3.select("#game_container").append("svg")
+							                                    .attr("width", width)
+							                                    .attr("height", height);
+							
+							
+							svgContainer.selectAll("path")
+							    .data(countries)
+							    .enter().append("path")
+							    .attr("d", path);
+							
+														    
+					    	/*d3.transition()
+					    	duration(1000)
+					        .each("start", function() {
+					          title.text(countries[i=i+1 % n].name);
+					        })
+					        .tween("rotate", function() {
+					          var p = d3.geo.centroid(countries[i]),
+					              r = d3.interpolate(projection.rotate(), [-p[0], -p[1]]);
+					          return function(t) {
+					            projection.rotate(r(t));
+					            
+					           
+					            //c.clearRect(0, 0, width, height);
+					            //c.fillStyle = "#bbb", c.beginPath(), path(land), c.fill();
+					           // c.fillStyle = "#f00", c.beginPath(), path(countries[i]), c.fill();
+					           // c.strokeStyle = "#fff", c.lineWidth = .5, c.beginPath(), path(borders), c.stroke();
+					           // c.strokeStyle = "#000", c.lineWidth = 2, c.beginPath(), path(globe), c.stroke();
+					          };
+					        })
+					      .transition()*/
+					      
+					  					  
+					    
+					   } 
+					
+					
+				}
 			
 				function gameLoop(){
 					
@@ -395,7 +470,7 @@ var game_container = d3.select("body")
 					iterationTracker++;
 					
 						
-				} setInterval(gameLoop,20);
+				} mapTest();//setInterval(gameLoop,20);
 			
 				
 				function addRocks(number)
